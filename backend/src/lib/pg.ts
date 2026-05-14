@@ -137,6 +137,18 @@ class QueryBuilder {
         return this;
     }
 
+    not(column: string, operator: string, value: unknown): this {
+        if (operator === "is" && value === null) {
+            this.conditions.push({ sql: `"${column}" IS NOT NULL`, values: [] });
+        } else if (operator === "eq") {
+            return this.neq(column, value);
+        } else {
+            const p = this.nextParam();
+            this.conditions.push({ sql: `NOT ("${column}" = ${p})`, values: [value] });
+        }
+        return this;
+    }
+
     filter(column: string, operator: string, value: unknown): this {
         if (operator === "cs") {
             const p = this.nextParam();

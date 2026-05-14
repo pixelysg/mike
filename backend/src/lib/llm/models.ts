@@ -60,14 +60,16 @@ export function providerForModel(model: string): Provider {
 }
 
 const BEDROCK_MODEL_MAP: Record<string, string> = {
-    "claude-opus-4-7": "anthropic.claude-opus-4-7",
-    "claude-sonnet-4-6": "anthropic.claude-sonnet-4-6",
-    "claude-haiku-4-5": "anthropic.claude-haiku-4-5",
+    "claude-opus-4-7": "anthropic.claude-opus-4-7-v1",
+    "claude-sonnet-4-6": "anthropic.claude-sonnet-4-6-v1",
+    "claude-haiku-4-5": "anthropic.claude-haiku-4-5-v1",
 };
 
 export function bedrockModelId(model: string): string {
     const stripped = model.replace("amazon-bedrock/", "");
-    return BEDROCK_MODEL_MAP[stripped] ?? stripped;
+    const mapped = BEDROCK_MODEL_MAP[stripped] ?? stripped;
+    const region = process.env.AWS_BEDROCK_REGION || process.env.AWS_REGION || "us-east-1";
+    return `${region}.${mapped}`;
 }
 
 export function resolveModel(id: string | null | undefined, fallback: string): string {
