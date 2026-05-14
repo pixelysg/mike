@@ -61,8 +61,8 @@ export function providerForModel(model: string): Provider {
 
 const BEDROCK_MODEL_IDS: Record<string, string> = {
     "claude-opus-4-6": "us.anthropic.claude-opus-4-6-v1",
-    "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-6-v1",
-    "claude-haiku-4-5": "us.anthropic.claude-haiku-4-5-20251001-v1",
+    "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-6",
+    "claude-haiku-4-5": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
 };
 
 export function bedrockModelId(model: string): string {
