@@ -28,6 +28,7 @@ export const MODELS: ModelOption[] = [
     { id: "gpt-5.5", label: "GPT-5.5", group: "OpenAI" },
     { id: "gpt-5.4-mini", label: "GPT-5.4 Mini", group: "OpenAI" },
     { id: "amazon-bedrock/claude-opus-4-7", label: "Claude Opus 4.7 (Bedrock)", group: "Amazon Bedrock" },
+    { id: "amazon-bedrock/claude-sonnet-4-6", label: "Claude Sonnet 4.6 (Bedrock)", group: "Amazon Bedrock" },
     { id: "amazon-bedrock/claude-haiku-4-5", label: "Claude Haiku 4.5 (Bedrock)", group: "Amazon Bedrock" },
 ];
 
