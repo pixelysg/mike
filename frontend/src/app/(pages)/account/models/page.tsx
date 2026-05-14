@@ -37,6 +37,11 @@ const API_KEY_FIELDS = [
         label: "OpenAI API Key",
         placeholder: "sk-…",
     },
+    {
+        provider: "amazon-bedrock",
+        label: "Amazon Bedrock (AWS Credentials)",
+        placeholder: '{"accessKeyId":"AKIA…","secretAccessKey":"…","region":"us-east-1"}',
+    },
 ] as const;
 
 export default function ModelsAndApiKeysPage() {
@@ -132,10 +137,11 @@ function TabularModelDropdown({
     const [isOpen, setIsOpen] = useState(false);
     const selected = MODELS.find((m) => m.id === value);
     const selectedAvailable = apiKeys ? isModelAvailable(value, apiKeys) : true;
-    const groups: ("Anthropic" | "Google" | "OpenAI")[] = [
+    const groups: ("Anthropic" | "Google" | "OpenAI" | "Amazon Bedrock")[] = [
         "Anthropic",
         "Google",
         "OpenAI",
+        "Amazon Bedrock",
     ];
 
     return (
