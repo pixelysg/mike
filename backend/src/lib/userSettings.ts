@@ -20,6 +20,7 @@ function resolveTitleModel(apiKeys: UserApiKeys): string {
     if (apiKeys.openai?.trim()) return OPENAI_LOW_MODELS[0];
     if (apiKeys.claude?.trim()) return "claude-haiku-4-5";
     if (apiKeys["amazon-bedrock"]?.trim()) return BEDROCK_LOW_MODELS[0];
+    if (process.env.AWS_ACCESS_KEY_ID?.trim()) return BEDROCK_LOW_MODELS[0];
     return DEFAULT_TITLE_MODEL;
 }
 

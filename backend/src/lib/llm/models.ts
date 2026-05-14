@@ -4,7 +4,7 @@ import type { Provider } from "./types";
 // Canonical model IDs
 // ---------------------------------------------------------------------------
 // Main-chat tier (top-end) — user picks one of these per message.
-export const CLAUDE_MAIN_MODELS = ["claude-opus-4-7", "claude-sonnet-4-6"] as const;
+export const CLAUDE_MAIN_MODELS = ["claude-opus-4-7", "claude-opus-4-6", "claude-sonnet-4-6"] as const;
 export const GEMINI_MAIN_MODELS = [
     "gemini-3.1-pro-preview",
     "gemini-3-flash-preview",
@@ -59,8 +59,15 @@ export function providerForModel(model: string): Provider {
     throw new Error(`Unknown model id: ${model}`);
 }
 
+const BEDROCK_MODEL_MAP: Record<string, string> = {
+    "claude-opus-4-7": "anthropic.claude-opus-4-7",
+    "claude-sonnet-4-6": "anthropic.claude-sonnet-4-6",
+    "claude-haiku-4-5": "anthropic.claude-haiku-4-5",
+};
+
 export function bedrockModelId(model: string): string {
-    return model.replace("amazon-bedrock/", "");
+    const stripped = model.replace("amazon-bedrock/", "");
+    return BEDROCK_MODEL_MAP[stripped] ?? stripped;
 }
 
 export function resolveModel(id: string | null | undefined, fallback: string): string {
