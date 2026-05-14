@@ -11,7 +11,6 @@ export const GEMINI_MAIN_MODELS = [
 ] as const;
 export const OPENAI_MAIN_MODELS = ["gpt-5.5", "gpt-5.4-mini"] as const;
 export const BEDROCK_MAIN_MODELS = [
-    "amazon-bedrock/claude-opus-4-7",
     "amazon-bedrock/claude-sonnet-4-6",
 ] as const;
 
@@ -59,22 +58,16 @@ export function providerForModel(model: string): Provider {
     throw new Error(`Unknown model id: ${model}`);
 }
 
-const BEDROCK_BASE_MODELS: Record<string, string> = {
-    "claude-opus-4-7": "anthropic.claude-opus-4-7-v1",
-    "claude-sonnet-4-6": "anthropic.claude-sonnet-4-6-v1",
-    "claude-haiku-4-5": "anthropic.claude-haiku-4-5-v1",
+const BEDROCK_MODEL_IDS: Record<string, string> = {
+    "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "claude-haiku-4-5": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
 };
-
-function bedrockInferencePrefix(): string {
-    const region = process.env.AWS_BEDROCK_REGION || process.env.AWS_REGION || "us-east-1";
-    if (region.startsWith("us-")) return "us";
-    return "global";
-}
 
 export function bedrockModelId(model: string): string {
     const stripped = model.replace("amazon-bedrock/", "");
-    const base = BEDROCK_BASE_MODELS[stripped] ?? stripped;
-    return `${bedrockInferencePrefix()}.${base}`;
+    const mapped = BEDROCK_MODEL_IDS[stripped];
+    if (!mapped) throw new Error(`No Bedrock model ID mapping for: ${stripped}`);
+    return mapped;
 }
 
 export function resolveModel(id: string | null | undefined, fallback: string): string {
