@@ -11,6 +11,7 @@ export const GEMINI_MAIN_MODELS = [
 ] as const;
 export const OPENAI_MAIN_MODELS = ["gpt-5.5", "gpt-5.4-mini"] as const;
 export const BEDROCK_MAIN_MODELS = [
+    "amazon-bedrock/claude-opus-4-6",
     "amazon-bedrock/claude-sonnet-4-6",
 ] as const;
 
@@ -59,7 +60,8 @@ export function providerForModel(model: string): Provider {
 }
 
 const BEDROCK_MODEL_IDS: Record<string, string> = {
-    "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "claude-opus-4-6": "us.anthropic.claude-opus-4-6-v1",
+    "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-6",
     "claude-haiku-4-5": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
 };
 
