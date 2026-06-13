@@ -17,6 +17,9 @@ export const GEMINI_MAIN_MODELS = [
 ] as const;
 export const OPENAI_MAIN_MODELS = ["gpt-5.5", "gpt-5.4"] as const;
 export const BEDROCK_MAIN_MODELS = [
+    "amazon-bedrock/claude-fable-5",
+    "amazon-bedrock/claude-opus-4-8",
+    "amazon-bedrock/claude-opus-4-7",
     "amazon-bedrock/claude-opus-4-6",
     "amazon-bedrock/claude-sonnet-4-6",
 ] as const;
@@ -65,10 +68,16 @@ export function providerForModel(model: string): Provider {
     throw new Error(`Unknown model id: ${model}`);
 }
 
+// Global cross-region inference profile IDs (verbatim from the AWS Bedrock
+// model cards). The "global." prefix routes to the lowest-latency region with
+// capacity; switch to a "us."/"eu." prefix if data residency requires it.
 const BEDROCK_MODEL_IDS: Record<string, string> = {
-    "claude-opus-4-6": "us.anthropic.claude-opus-4-6-v1",
-    "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-6",
-    "claude-haiku-4-5": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "claude-fable-5": "global.anthropic.claude-fable-5",
+    "claude-opus-4-8": "global.anthropic.claude-opus-4-8",
+    "claude-opus-4-7": "global.anthropic.claude-opus-4-7",
+    "claude-opus-4-6": "global.anthropic.claude-opus-4-6-v1",
+    "claude-sonnet-4-6": "global.anthropic.claude-sonnet-4-6",
+    "claude-haiku-4-5": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
 };
 
 export function bedrockModelId(model: string): string {
