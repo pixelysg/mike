@@ -3,8 +3,8 @@
 import { type Dispatch, type SetStateAction } from "react";
 import { MessageSquare } from "lucide-react";
 import { RowActions } from "@/app/components/shared/RowActions";
-import type { MikeChat } from "@/app/components/shared/types";
-import { CHECK_W, formatDate, NAME_COL_W } from "./ProjectPageParts";
+import type { Chat } from "@/app/components/shared/types";
+import { formatDate, NAME_COL_W } from "./ProjectPageParts";
 
 export function ProjectAssistantTab({
     chats,
@@ -24,8 +24,8 @@ export function ProjectAssistantTab({
     setRenamingChatId,
     setRenameChatValue,
 }: {
-    chats: MikeChat[];
-    filteredChats: MikeChat[];
+    chats: Chat[];
+    filteredChats: Chat[];
     selectedChatIds: string[];
     allChatsSelected: boolean;
     someChatsSelected: boolean;
@@ -34,19 +34,19 @@ export function ProjectAssistantTab({
     currentUserId?: string | null;
     onCreateChat: () => void;
     onOpenChat: (chatId: string) => void;
-    onDeleteChat: (chat: MikeChat) => Promise<void> | void;
+    onDeleteChat: (chat: Chat) => Promise<void> | void;
     onOwnerOnlyAction: (action: string) => void;
     submitChatRename: (chatId: string) => Promise<void> | void;
     setSelectedChatIds: Dispatch<SetStateAction<string[]>>;
     setRenamingChatId: Dispatch<SetStateAction<string | null>>;
     setRenameChatValue: Dispatch<SetStateAction<string>>;
 }) {
+    const stickyCellBg = "bg-[#fafbfc]";
+
     return (
         <>
             <div className="flex items-center h-8 pr-8 border-b border-gray-200 text-xs text-gray-500 font-medium select-none">
-                <div
-                    className={`sticky left-0 z-[60] ${CHECK_W} relative bg-white flex items-center justify-center self-stretch before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-white`}
-                >
+                <div className={`sticky left-0 z-[60] ${NAME_COL_W} ${stickyCellBg} flex items-center gap-4 self-stretch pl-4 pr-2 text-left`}>
                     <input
                         type="checkbox"
                         checked={allChatsSelected}
@@ -59,11 +59,7 @@ export function ProjectAssistantTab({
                         }}
                         className="h-2.5 w-2.5 rounded border-gray-200 cursor-pointer accent-black"
                     />
-                </div>
-                <div
-                    className={`sticky left-8 z-[60] ${NAME_COL_W} bg-white pl-2 text-left`}
-                >
-                    Chats
+                    <span>Chats</span>
                 </div>
                 <div className="ml-auto w-32 shrink-0 text-left">Created</div>
                 <div className="w-8 shrink-0" />
@@ -94,58 +90,48 @@ export function ProjectAssistantTab({
                                 if (renamingChatId === chat.id) return;
                                 onOpenChat(chat.id);
                             }}
-                            className="group flex items-center h-10 pr-8 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
+                            className="group flex items-center h-10 pr-8 border-b border-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
                         >
                             <div
-                                className={`sticky left-0 z-[60] ${CHECK_W} p-2 flex items-center justify-center ${
-                                    selectedChatIds.includes(chat.id)
-                                        ? "bg-gray-50"
-                                        : "bg-white"
-                                } group-hover:bg-gray-50`}
-                                onClick={(e) => e.stopPropagation()}
+                                className={`sticky left-0 z-[60] ${NAME_COL_W} ${selectedChatIds.includes(chat.id) ? "bg-gray-50" : stickyCellBg} py-2 pl-4 pr-2 transition-colors group-hover:bg-gray-100`}
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedChatIds.includes(chat.id)}
-                                    onChange={() =>
-                                        setSelectedChatIds((prev) =>
-                                            prev.includes(chat.id)
-                                                ? prev.filter((x) => x !== chat.id)
-                                                : [...prev, chat.id],
-                                        )
-                                    }
-                                    className="h-2.5 w-2.5 rounded border-gray-200 cursor-pointer accent-black"
-                                />
-                            </div>
-                            <div
-                                className={`sticky left-8 z-[60] ${NAME_COL_W} p-2 ${
-                                    selectedChatIds.includes(chat.id)
-                                        ? "bg-gray-50"
-                                        : "bg-white"
-                                } group-hover:bg-gray-50`}
-                            >
-                                {renamingChatId === chat.id ? (
+                                <div className="flex min-w-0 items-center gap-4">
                                     <input
-                                        autoFocus
-                                        value={renameChatValue}
-                                        onChange={(e) =>
-                                            setRenameChatValue(e.target.value)
+                                        type="checkbox"
+                                        checked={selectedChatIds.includes(chat.id)}
+                                        onChange={() =>
+                                            setSelectedChatIds((prev) =>
+                                                prev.includes(chat.id)
+                                                    ? prev.filter((x) => x !== chat.id)
+                                                    : [...prev, chat.id],
+                                            )
                                         }
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter")
-                                                void submitChatRename(chat.id);
-                                            if (e.key === "Escape")
-                                                setRenamingChatId(null);
-                                        }}
-                                        onBlur={() => void submitChatRename(chat.id)}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="w-full text-sm text-gray-800 bg-transparent outline-none"
+                                        className="h-2.5 w-2.5 shrink-0 rounded border-gray-200 cursor-pointer accent-black"
                                     />
-                                ) : (
-                                    <span className="text-sm text-gray-800 truncate block">
-                                        {chat.title ?? "Untitled Chat"}
-                                    </span>
-                                )}
+                                    {renamingChatId === chat.id ? (
+                                        <input
+                                            autoFocus
+                                            value={renameChatValue}
+                                            onChange={(e) =>
+                                                setRenameChatValue(e.target.value)
+                                            }
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter")
+                                                    void submitChatRename(chat.id);
+                                                if (e.key === "Escape")
+                                                    setRenamingChatId(null);
+                                            }}
+                                            onBlur={() => void submitChatRename(chat.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="min-w-0 flex-1 text-sm text-gray-800 bg-transparent outline-none"
+                                        />
+                                    ) : (
+                                        <span className="min-w-0 flex-1 truncate text-sm text-gray-800">
+                                            {chat.title ?? "Untitled Chat"}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="ml-auto w-32 shrink-0 text-sm text-gray-500 truncate">
                                 {formatDate(chat.created_at)}

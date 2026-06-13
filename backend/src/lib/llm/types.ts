@@ -41,6 +41,8 @@ export type UserApiKeys = {
     gemini?: string | null;
     openai?: string | null;
     "amazon-bedrock"?: string | null;
+    openrouter?: string | null;
+    courtlistener?: string | null;
 };
 
 export type StreamChatParams = {
@@ -59,6 +61,7 @@ export type StreamChatParams = {
      * one-shot completions should leave this off to save tokens and latency.
      */
     enableThinking?: boolean;
+    abortSignal?: AbortSignal;
 };
 
 export type StreamChatResult = {

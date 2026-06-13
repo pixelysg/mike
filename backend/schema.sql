@@ -1,7 +1,6 @@
 -- Mike Supabase schema
--- Based on supabase-migration.sql plus the later backend/migrations/*.sql files.
 -- Use this for a fresh Supabase database. Existing deployments should continue
--- to apply the incremental migration files instead.
+-- to apply the incremental migration files in backend/oss-migrations instead.
 
 create extension if not exists "pgcrypto";
 
@@ -17,7 +16,11 @@ create table if not exists public.user_profiles (
   tier text not null default 'Free',
   message_credits_used integer not null default 0,
   credits_reset_date timestamptz not null default (now() + interval '30 days'),
+  title_model text,
   tabular_model text not null default 'gemini-3-flash-preview',
+  quote_model text,
+  mfa_on_login boolean not null default false,
+  legal_research_us boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -50,7 +53,7 @@ create trigger on_auth_user_created
 create table if not exists public.user_api_keys (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  provider text not null check (provider in ('claude', 'gemini', 'openai', 'amazon-bedrock')),
+  provider text not null check (provider in ('claude', 'gemini', 'openai', 'amazon-bedrock', 'openrouter', 'courtlistener')),
   encrypted_key text not null,
   iv text not null,
   auth_tag text not null,
@@ -61,6 +64,8 @@ create table if not exists public.user_api_keys (
 
 create index if not exists idx_user_api_keys_user
   on public.user_api_keys(user_id);
+
+alter table public.user_api_keys enable row level security;
 
 -- ---------------------------------------------------------------------------
 -- Projects and documents
@@ -100,11 +105,6 @@ create table if not exists public.documents (
   id uuid primary key default gen_random_uuid(),
   project_id uuid references public.projects(id) on delete cascade,
   user_id text not null,
-  filename text not null,
-  file_type text,
-  size_bytes integer not null default 0,
-  page_count integer,
-  structure_tree jsonb,
   status text not null default 'pending',
   folder_id uuid references public.project_subfolders(id) on delete set null,
   created_at timestamptz not null default now(),
@@ -120,11 +120,16 @@ create index if not exists idx_documents_project_folder
 create table if not exists public.document_versions (
   id uuid primary key default gen_random_uuid(),
   document_id uuid not null references public.documents(id) on delete cascade,
-  storage_path text not null,
+  storage_path text,
   pdf_storage_path text,
   source text not null default 'upload',
   version_number integer,
-  display_name text,
+  filename text,
+  file_type text,
+  size_bytes integer,
+  page_count integer,
+  deleted_at timestamptz,
+  deleted_by uuid,
   created_at timestamptz not null default now(),
   constraint document_versions_source_check
     check (source = any (array[
@@ -140,8 +145,27 @@ create table if not exists public.document_versions (
 create index if not exists document_versions_document_id_idx
   on public.document_versions(document_id, created_at desc);
 
+create index if not exists document_versions_active_document_id_idx
+  on public.document_versions(document_id, created_at desc)
+  where deleted_at is null;
+
 create index if not exists document_versions_doc_vnum_idx
   on public.document_versions(document_id, version_number);
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'document_versions_doc_version_unique'
+      and conrelid = 'public.document_versions'::regclass
+  ) then
+    alter table public.document_versions
+      add constraint document_versions_doc_version_unique
+      unique (document_id, version_number);
+  end if;
+end;
+$$;
 
 alter table public.documents
   add column if not exists current_version_id uuid
@@ -283,6 +307,7 @@ create table if not exists public.tabular_reviews (
   user_id text not null,
   title text,
   columns_config jsonb,
+  document_ids jsonb,
   workflow_id uuid references public.workflows(id) on delete set null,
   practice text,
   shared_with jsonb not null default '[]'::jsonb,
@@ -341,6 +366,45 @@ create index if not exists tabular_review_chat_messages_chat_idx
   on public.tabular_review_chat_messages(chat_id, created_at);
 
 -- ---------------------------------------------------------------------------
+-- CourtListener bulk-data indexes
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.courtlistener_citation_index (
+  id bigint primary key,
+  volume text not null,
+  reporter text not null,
+  page text not null,
+  type integer,
+  cluster_id bigint not null,
+  date_created timestamptz,
+  date_modified timestamptz
+);
+
+create index if not exists courtlistener_citation_lookup_idx
+  on public.courtlistener_citation_index(volume, reporter, page);
+
+create index if not exists courtlistener_citation_cluster_idx
+  on public.courtlistener_citation_index(cluster_id);
+
+alter table public.courtlistener_citation_index enable row level security;
+
+create table if not exists public.courtlistener_opinion_cluster_index (
+  id bigint primary key,
+  case_name text,
+  case_name_short text,
+  case_name_full text,
+  slug text,
+  date_filed date,
+  citation_count integer,
+  precedential_status text,
+  filepath_pdf_harvard text,
+  filepath_json_harvard text,
+  docket_id bigint
+);
+
+alter table public.courtlistener_opinion_cluster_index enable row level security;
+
+-- ---------------------------------------------------------------------------
 -- Direct client grant hardening
 -- ---------------------------------------------------------------------------
 --
@@ -365,3 +429,5 @@ revoke all on public.tabular_cells from anon, authenticated;
 revoke all on public.tabular_review_chats from anon, authenticated;
 revoke all on public.tabular_review_chat_messages from anon, authenticated;
 revoke all on public.user_api_keys from anon, authenticated;
+revoke all on public.courtlistener_citation_index from anon, authenticated;
+revoke all on public.courtlistener_opinion_cluster_index from anon, authenticated;

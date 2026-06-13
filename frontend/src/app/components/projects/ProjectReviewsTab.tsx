@@ -3,8 +3,8 @@
 import { type Dispatch, type SetStateAction } from "react";
 import { Table2 } from "lucide-react";
 import { RowActions } from "@/app/components/shared/RowActions";
-import type { MikeDocument, TabularReview } from "@/app/components/shared/types";
-import { CHECK_W, formatDate, NAME_COL_W } from "./ProjectPageParts";
+import type { Document, TabularReview } from "@/app/components/shared/types";
+import { formatDate, NAME_COL_W } from "./ProjectPageParts";
 
 export function ProjectReviewsTab({
     docs,
@@ -26,7 +26,7 @@ export function ProjectReviewsTab({
     setRenamingReviewId,
     setRenameReviewValue,
 }: {
-    docs: MikeDocument[];
+    docs: Document[];
     reviews: TabularReview[];
     filteredReviews: TabularReview[];
     selectedReviewIds: string[];
@@ -45,12 +45,12 @@ export function ProjectReviewsTab({
     setRenamingReviewId: Dispatch<SetStateAction<string | null>>;
     setRenameReviewValue: Dispatch<SetStateAction<string>>;
 }) {
+    const stickyCellBg = "bg-[#fafbfc]";
+
     return (
         <>
             <div className="flex items-center h-8 pr-8 border-b border-gray-200 text-xs text-gray-500 font-medium select-none">
-                <div
-                    className={`sticky left-0 z-[60] ${CHECK_W} relative bg-white flex items-center justify-center self-stretch before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-white`}
-                >
+                <div className={`sticky left-0 z-[60] ${NAME_COL_W} ${stickyCellBg} flex items-center gap-4 self-stretch pl-4 pr-2 text-left`}>
                     <input
                         type="checkbox"
                         checked={allReviewsSelected}
@@ -66,11 +66,7 @@ export function ProjectReviewsTab({
                         }}
                         className="h-2.5 w-2.5 rounded border-gray-200 cursor-pointer accent-black"
                     />
-                </div>
-                <div
-                    className={`sticky left-8 z-[60] ${NAME_COL_W} bg-white pl-2 text-left`}
-                >
-                    Name
+                    <span>Name</span>
                 </div>
                 <div className="ml-auto w-24 shrink-0 text-left">Columns</div>
                 <div className="w-24 shrink-0 text-left">Documents</div>
@@ -103,62 +99,52 @@ export function ProjectReviewsTab({
                                 if (renamingReviewId === review.id) return;
                                 onOpenReview(review.id);
                             }}
-                            className="group flex items-center h-10 pr-8 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
+                            className="group flex items-center h-10 pr-8 border-b border-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
                         >
                             <div
-                                className={`sticky left-0 z-[60] ${CHECK_W} p-2 flex items-center justify-center ${
-                                    selectedReviewIds.includes(review.id)
-                                        ? "bg-gray-50"
-                                        : "bg-white"
-                                } group-hover:bg-gray-50`}
-                                onClick={(e) => e.stopPropagation()}
+                                className={`sticky left-0 z-[60] ${NAME_COL_W} ${selectedReviewIds.includes(review.id) ? "bg-gray-50" : stickyCellBg} py-2 pl-4 pr-2 transition-colors group-hover:bg-gray-100`}
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedReviewIds.includes(review.id)}
-                                    onChange={() =>
-                                        setSelectedReviewIds((prev) =>
-                                            prev.includes(review.id)
-                                                ? prev.filter(
-                                                      (x) => x !== review.id,
-                                                  )
-                                                : [...prev, review.id],
-                                        )
-                                    }
-                                    className="h-2.5 w-2.5 rounded border-gray-200 cursor-pointer accent-black"
-                                />
-                            </div>
-                            <div
-                                className={`sticky left-8 z-[60] ${NAME_COL_W} p-2 ${
-                                    selectedReviewIds.includes(review.id)
-                                        ? "bg-gray-50"
-                                        : "bg-white"
-                                } group-hover:bg-gray-50`}
-                            >
-                                {renamingReviewId === review.id ? (
+                                <div className="flex min-w-0 items-center gap-4">
                                     <input
-                                        autoFocus
-                                        value={renameReviewValue}
-                                        onChange={(e) =>
-                                            setRenameReviewValue(e.target.value)
-                                        }
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter")
-                                                void submitReviewRename(review.id);
-                                            if (e.key === "Escape")
-                                                setRenamingReviewId(null);
-                                        }}
-                                        onBlur={() =>
-                                            void submitReviewRename(review.id)
+                                        type="checkbox"
+                                        checked={selectedReviewIds.includes(review.id)}
+                                        onChange={() =>
+                                            setSelectedReviewIds((prev) =>
+                                                prev.includes(review.id)
+                                                    ? prev.filter(
+                                                          (x) => x !== review.id,
+                                                      )
+                                                    : [...prev, review.id],
+                                            )
                                         }
                                         onClick={(e) => e.stopPropagation()}
-                                        className="w-full text-sm text-gray-800 bg-transparent outline-none"
+                                        className="h-2.5 w-2.5 shrink-0 rounded border-gray-200 cursor-pointer accent-black"
                                     />
-                                ) : (
-                                    <span className="text-sm text-gray-800 truncate block">
-                                        {review.title ?? "Untitled Review"}
-                                    </span>
-                                )}
+                                    {renamingReviewId === review.id ? (
+                                        <input
+                                            autoFocus
+                                            value={renameReviewValue}
+                                            onChange={(e) =>
+                                                setRenameReviewValue(e.target.value)
+                                            }
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter")
+                                                    void submitReviewRename(review.id);
+                                                if (e.key === "Escape")
+                                                    setRenamingReviewId(null);
+                                            }}
+                                            onBlur={() =>
+                                                void submitReviewRename(review.id)
+                                            }
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="min-w-0 flex-1 text-sm text-gray-800 bg-transparent outline-none"
+                                        />
+                                    ) : (
+                                        <span className="min-w-0 flex-1 truncate text-sm text-gray-800">
+                                            {review.title ?? "Untitled Review"}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="ml-auto w-24 shrink-0 text-sm text-gray-500 truncate">
                                 {review.columns_config?.length ?? 0}

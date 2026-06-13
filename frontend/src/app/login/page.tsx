@@ -8,6 +8,12 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { SiteLogo } from "@/components/site-logo";
 import { useAuth } from "@/contexts/AuthContext";
+
+const authGlassCardClassName =
+    "rounded-2xl border border-white/70 bg-white/72 p-8 shadow-[0_4px_14px_rgba(15,23,42,0.045),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-8px_18px_rgba(255,255,255,0.12)] backdrop-blur-2xl";
+const authInputClassName =
+    "rounded-lg border border-transparent bg-gray-100 px-3 shadow-none focus-visible:border-gray-200 focus-visible:ring-2 focus-visible:ring-gray-300/45";
+
 export default function LoginPage() {
     const router = useRouter();
     const { isAuthenticated, authLoading } = useAuth();
@@ -44,19 +50,19 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-dvh bg-white flex items-start justify-center px-6 pt-32 md:pt-40 pb-10 relative">
+        <div className="min-h-dvh bg-gray-50/80 flex items-start justify-center px-6 pt-32 md:pt-40 pb-10 relative">
             <div className="absolute top-4 md:top-8 left-1/2 -translate-x-1/2">
-                <SiteLogo size="md" className="md:text-4xl" asLink />
+                <SiteLogo size="lg" asLink />
             </div>
             <div className="w-full max-w-md">
                 {/* Login Form */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-8 mb-4">
+                <div className={`${authGlassCardClassName} mb-4`}>
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-left text-2xl font-serif">
                             Log In
                         </h2>
-                        <div className="bg-gray-100 p-1 rounded-md flex text-xs font-medium">
-                            <span className="text-gray-600 px-3 py-1 bg-white rounded-sm shadow-sm">
+                        <div className="bg-gray-200/70 p-1 rounded-lg flex text-xs font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-3px_8px_rgba(148,163,184,0.16)] backdrop-blur-xl">
+                            <span className="text-gray-700 px-3 py-1 bg-white/85 rounded-md shadow-[0_1px_4px_rgba(15,23,42,0.06)]">
                                 Log in
                             </span>
                             <Link
@@ -82,7 +88,7 @@ export default function LoginPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter your email"
                                 required
-                                className="w-full"
+                                className={`w-full ${authInputClassName}`}
                             />
                         </div>
 
@@ -100,7 +106,7 @@ export default function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter your password"
                                 required
-                                className="w-full"
+                                className={`w-full ${authInputClassName}`}
                             />
                         </div>
 
